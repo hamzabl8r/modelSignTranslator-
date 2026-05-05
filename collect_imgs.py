@@ -8,7 +8,7 @@ if not os.path.exists(DATA_DIR):
     os.makedirs(DATA_DIR)
 
 # Your updated list of words
-classes = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'HELP', 'FRIEND', '5ODH', 'NOTHING','CAR'] 
+classes = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'YALLA', 'FRIEND', '5ODH', 'NOTHING','CAR'] 
 images_per_class = 200  # Total images needed for a strong static model
 
 cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
