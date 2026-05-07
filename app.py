@@ -2,32 +2,36 @@ from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, Sec
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import APIKeyHeader
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
-
 from typing import List, Optional
 from pathlib import Path
 from datetime import datetime
 import shutil
 import pickle
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
-
 MODEL_PATH = BASE_DIR / "model.p"
 
-DATA_DIR.mkdir(exist_ok=True)
 DATA_DIR.mkdir(exist_ok=True)
 
 app = FastAPI(title="MyTransApp - Sign Language Backend")
 
+# Enhanced CORS configuration
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"],
 )
 
 app.mount("/uploads", StaticFiles(directory=str(DATA_DIR)), name="uploads")
@@ -38,11 +42,21 @@ model_bundle = None
 def load_model():
     global model_bundle
     if MODEL_PATH.exists():
-        with open(MODEL_PATH, "rb") as f:
-            model_bundle = pickle.load(f)
-        print(f"✅ Model loaded from {MODEL_PATH}")
+        try:
+            with open(MODEL_PATH, "rb") as f:
+                model_bundle = pickle.load(f)
+            logger.info(f"✅ Model loaded from {MODEL_PATH}")
+            
+            # Log model info
+            if isinstance(model_bundle, dict):
+                logger.info(f"Model bundle keys: {model_bundle.keys()}")
+                if "model" in model_bundle:
+                    logger.info(f"Model type: {type(model_bundle['model'])}")
+        except Exception as e:
+            logger.error(f"Error loading model: {e}")
+            model_bundle = None
     else:
-        print("⚠️ model.p not found — prediction endpoint will be unavailable")
+        logger.warning("⚠️ model.p not found — prediction endpoint will be unavailable")
 
 load_model()
 
@@ -96,16 +110,11 @@ async def get_dictionary():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 # ── GET /api/signs/:label/images ─────────────────────────────────────────────
 @app.get("/api/signs/{label}/images")
 async def get_sign_images(label: str, request: Request):
     clean_label = label.strip().upper().replace(" ", "_")
-
-    # Check uploads/ first, then data/
     folder = DATA_DIR / clean_label
-    if not folder.is_dir():
-        folder = DATA_DIR / clean_label
 
     if not folder.is_dir():
         return {"images": []}
@@ -116,12 +125,10 @@ async def get_sign_images(label: str, request: Request):
         if f.suffix.lower() in allowed_ext
     ])
 
-    # Build absolute URLs using the request's base URL (works with ngrok)
     base_url = str(request.base_url).rstrip("/")
     images = [f"{base_url}/uploads/{clean_label}/{f}" for f in files]
 
     return {"images": images}
-
 
 @app.post("/api/signs/contribute")
 async def contribute(
@@ -132,25 +139,16 @@ async def contribute(
 ):
     try:
         clean_label = label.strip().upper().replace(" ", "_")
-
         upload_label_dir = DATA_DIR / clean_label
         upload_label_dir.mkdir(parents=True, exist_ok=True)
 
-        data_label_dir = DATA_DIR / clean_label
-        data_label_dir.mkdir(parents=True, exist_ok=True)
-
-        existing = count_images_in_dir(data_label_dir)
+        existing = count_images_in_dir(upload_label_dir)
         file_name = f"{existing}.jpg"
 
         upload_path = upload_label_dir / file_name
-        data_path = data_label_dir / file_name
-
         contents = await image.read()
 
         with open(upload_path, "wb") as f:
-            f.write(contents)
-
-        with open(data_path, "wb") as f:
             f.write(contents)
 
         return {
@@ -165,36 +163,59 @@ async def contribute(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
 @app.post("/predict")
 async def predict(request: LandmarksRequest):
+    """
+    Predict sign language from hand landmarks
+    Expects 84 float values (42 per hand x 2 hands)
+    """
     try:
+        logger.info(f"Received prediction request with {len(request.landmarks)} landmarks")
+        
+        # Validate input
+        if not request.landmarks:
+            raise HTTPException(status_code=400, detail="No landmarks provided")
+        
+        if len(request.landmarks) != 84:
+            logger.warning(f"Expected 84 landmarks, got {len(request.landmarks)}")
+            # Still try to process if we have at least some data
+            if len(request.landmarks) < 42:
+                raise HTTPException(status_code=400, detail=f"Expected at least 42 landmarks, got {len(request.landmarks)}")
+        
+        # Check if model is loaded
         if model_bundle is None:
+            logger.error("Model not loaded")
             raise HTTPException(status_code=503, detail="Model not loaded. Please train and upload model.p")
-
+        
+        # Extract model from bundle
         model = (
             model_bundle["model"]
             if isinstance(model_bundle, dict) and "model" in model_bundle
             else model_bundle
         )
-
+        
+        # Make prediction
         prediction = model.predict([request.landmarks])[0]
-
+        logger.info(f"Prediction: {prediction}")
+        
+        # Get confidence if available
         confidence = None
         if hasattr(model, "predict_proba"):
             probs = model.predict_proba([request.landmarks])[0]
             confidence = float(max(probs))
-
-        return {
+            logger.info(f"Confidence: {confidence}")
+        
+        return JSONResponse(content={
             "res": prediction,
             "prediction": prediction,
             "confidence": confidence,
-        }
+        })
+        
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Prediction failed: {str(e)}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
-
 
 @app.post("/reload-model")
 async def reload_model(_: Optional[str] = Depends(verify_api_key)):
@@ -204,6 +225,14 @@ async def reload_model(_: Optional[str] = Depends(verify_api_key)):
         "model_loaded": model_bundle is not None,
     }
 
+@app.get("/health")
+async def health_check():
+    """Simple health check endpoint"""
+    return {
+        "status": "healthy",
+        "model_loaded": model_bundle is not None,
+        "data_dir_exists": DATA_DIR.exists()
+    }
 
 if __name__ == "__main__":
     import uvicorn
