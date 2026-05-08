@@ -278,6 +278,31 @@ async def contribute(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.delete("/api/signs/{label}")
+async def delete_sign(
+    label: str,
+    _: Optional[str] = Depends(verify_api_key),
+):
+    try:
+        clean_label = clean_label_name(label)
+        sign_dir = DATA_DIR / clean_label
+
+        if not sign_dir.exists() or not sign_dir.is_dir():
+            raise HTTPException(status_code=404, detail="Sign not found")
+
+        shutil.rmtree(sign_dir)
+
+        return {
+            "status": "ok",
+            "message": "Sign deleted successfully",
+            "label": clean_label,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.post("/predict")
 async def predict(request: LandmarksRequest):
     try:
