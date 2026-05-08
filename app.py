@@ -343,8 +343,5 @@ if __name__ == "__main__":
 
     port = int(os.getenv("PORT", "8000"))
 
-<<<<<<< HEAD
     uvicorn.run(app, host="0.0.0.0", port=port)
-=======
     uvicorn.run(app, host="0.0.0.0", port=port)
->>>>>>> 7b05ad02be46e96d9abfc7f55ad67e5baa1150d5
