@@ -6,10 +6,40 @@ import cv2
 DATA_DIR = './data'
 os.makedirs(DATA_DIR, exist_ok=True)
 
-classes = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'YALLA', 'FRIEND', '5ODH', 'NOTHING', 'CAR']
+
+DEFAULT_CLASSES = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'YALLA', 'FRIEND', '5ODH', 'NOTHING', 'CAR']
+
 images_per_class = 200
 
-# FIXED: removed cv2.CAP_DSHOW (Windows-only) for cross-platform compatibility
+
+# ==================== RESTORE DEFAULT CLASSES ====================
+
+def restore_default_classes():
+    """
+    Recrée les dossiers manquants pour chaque mot de DEFAULT_CLASSES.
+    Si un dossier a été supprimé, il sera recréé ici au prochain lancement.
+    """
+    restored = []
+    for class_name in DEFAULT_CLASSES:
+        class_path = os.path.join(DATA_DIR, class_name)
+        if not os.path.exists(class_path):
+            os.makedirs(class_path)
+            restored.append(class_name)
+
+    if restored:
+        print(f"🔄 Dossiers recréés (mots par défaut restaurés) : {', '.join(restored)}")
+    else:
+        print("✅ Tous les mots par défaut sont déjà présents.")
+
+
+restore_default_classes()
+
+# La liste active = DEFAULT_CLASSES (on collecte uniquement les mots par défaut)
+classes = DEFAULT_CLASSES
+
+
+# ==================== WEBCAM ====================
+
 cap = cv2.VideoCapture(0)
 cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
@@ -18,8 +48,6 @@ if not cap.isOpened():
     print("❌ Could not open webcam. Check your camera index.")
     sys.exit(1)
 
-# FIXED: wrapped entire collection loop in try/finally so the camera
-# is always released even if the user presses Ctrl+C or an error occurs.
 try:
     for class_name in classes:
         class_path = os.path.join(DATA_DIR, class_name)
