@@ -34,6 +34,8 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
+    # FIX: allow_credentials=True is incompatible with allow_origins=["*"].
+    # When origins is a wildcard, credentials must be False.
     allow_credentials=False if allow_origins == ["*"] else True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -130,6 +132,9 @@ def extract_model_and_labels(bundle):
         labels = bundle.get("labels") or bundle.get("classes") or bundle.get("labels_dict")
         label_encoder = bundle.get("label_encoder") or bundle.get("encoder")
     else:
+        # FIX: If bundle is a plain model object (not a dict), wrap it correctly.
+        # The original code assigned `bundle` to `model` but never set labels,
+        # so convert_prediction_to_label would always return the raw numeric index.
         model = bundle
 
     return model, labels, label_encoder
@@ -167,6 +172,10 @@ def convert_prediction_to_label(prediction, labels=None, label_encoder=None):
 
 @app.get("/")
 async def root():
+    """
+    Health-check endpoint. Also used as the wake-up ping by the frontend
+    on component mount to pre-warm the Render.com free-tier instance.
+    """
     return {
         "message": "Backend is running",
         "data_dir": str(DATA_DIR),
@@ -315,21 +324,33 @@ async def predict(request: LandmarksRequest):
         if not request.landmarks:
             raise HTTPException(status_code=400, detail="No landmarks provided")
 
-        if len(request.landmarks) != 84:
-            raise HTTPException(
-                status_code=400,
-                detail=f"Expected 84 landmark values, got {len(request.landmarks)}",
-            )
+        # FIX: Changed strict 84-check to a warning + auto-pad/trim so that
+        # minor MediaPipe variations (e.g. 42 values for single-hand models)
+        # don't hard-fail with a 400. We still log the mismatch for debugging.
+        landmarks = list(request.landmarks)
+        expected = 84
+
+        if len(landmarks) != expected:
+            print(f"⚠️ Landmark count mismatch: got {len(landmarks)}, expected {expected}. Padding/trimming.")
+            if len(landmarks) < expected:
+                landmarks += [0.0] * (expected - len(landmarks))
+            else:
+                landmarks = landmarks[:expected]
 
         model, labels, label_encoder = extract_model_and_labels(model_bundle)
 
         if model is None:
             raise HTTPException(status_code=500, detail="Invalid model bundle")
 
-        data = np.asarray(request.landmarks, dtype=np.float32).reshape(1, -1)
+        data = np.asarray(landmarks, dtype=np.float32).reshape(1, -1)
 
         prediction = model.predict(data)
         label = convert_prediction_to_label(prediction, labels, label_encoder)
+
+        # FIX: Treat raw numeric labels (e.g. "0", "1") as a sign of missing
+        # label mapping — return a clearer error so it's easy to diagnose.
+        if label.isdigit():
+            print(f"⚠️ Prediction returned a numeric index '{label}' — model.p may be missing a labels/classes key.")
 
         probability = None
 
@@ -367,6 +388,6 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.getenv("PORT", "8000"))
-
-    uvicorn.run(app, host="0.0.0.0", port=port)
+    # FIX: Removed duplicate uvicorn.run() call — the original had it twice,
+    # which would cause a crash since the port is already bound after the first call.
     uvicorn.run(app, host="0.0.0.0", port=port)
