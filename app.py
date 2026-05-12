@@ -8,6 +8,7 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 import pickle
+import json
 import os
 import uuid
 import numpy as np
@@ -16,6 +17,7 @@ import numpy as np
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
 MODEL_PATH = BASE_DIR / "model.p"
+METRICS_PATH = BASE_DIR / "train_metrics.json"
 
 DATA_DIR.mkdir(exist_ok=True)
 
@@ -47,6 +49,7 @@ app.mount("/uploads", StaticFiles(directory=str(DATA_DIR)), name="uploads")
 # ==================== MODEL LOADING ====================
 
 model_bundle = None
+mismatch_warned_pairs = set()
 
 
 def load_model():
@@ -168,6 +171,21 @@ def convert_prediction_to_label(prediction, labels=None, label_encoder=None):
     return str(value)
 
 
+def get_expected_feature_count(model) -> int:
+    """
+    Return the model input feature size when available.
+    Falls back to 84 for backward compatibility.
+    """
+    try:
+        n_features = getattr(model, "n_features_in_", None)
+        if isinstance(n_features, (int, np.integer)) and int(n_features) > 0:
+            return int(n_features)
+    except Exception:
+        pass
+
+    return 84
+
+
 # ==================== ROUTES ====================
 
 @app.get("/")
@@ -198,6 +216,25 @@ async def get_dictionary():
             })
 
         return {"signs": signs}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/classification")
+async def get_classification_metrics():
+    try:
+        if not METRICS_PATH.exists():
+            raise HTTPException(
+                status_code=404,
+                detail="train_metrics.json not found. Run train_classifier.py first.",
+            )
+
+        with open(METRICS_PATH, "r", encoding="utf-8") as f:
+            metrics = json.load(f)
+
+        return metrics
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -315,6 +352,8 @@ async def delete_sign(
 @app.post("/predict")
 async def predict(request: LandmarksRequest):
     try:
+        global mismatch_warned_pairs
+
         if model_bundle is None:
             raise HTTPException(
                 status_code=503,
@@ -324,23 +363,24 @@ async def predict(request: LandmarksRequest):
         if not request.landmarks:
             raise HTTPException(status_code=400, detail="No landmarks provided")
 
-        # FIX: Changed strict 84-check to a warning + auto-pad/trim so that
-        # minor MediaPipe variations (e.g. 42 values for single-hand models)
-        # don't hard-fail with a 400. We still log the mismatch for debugging.
         landmarks = list(request.landmarks)
-        expected = 84
-
-        if len(landmarks) != expected:
-            print(f"⚠️ Landmark count mismatch: got {len(landmarks)}, expected {expected}. Padding/trimming.")
-            if len(landmarks) < expected:
-                landmarks += [0.0] * (expected - len(landmarks))
-            else:
-                landmarks = landmarks[:expected]
-
         model, labels, label_encoder = extract_model_and_labels(model_bundle)
 
         if model is None:
             raise HTTPException(status_code=500, detail="Invalid model bundle")
+
+        expected = get_expected_feature_count(model)
+
+        if len(landmarks) != expected:
+            pair = (len(landmarks), expected)
+            if pair not in mismatch_warned_pairs:
+                mismatch_warned_pairs.add(pair)
+                print(f"⚠️ Landmark count mismatch: got {len(landmarks)}, expected {expected}. Padding/trimming.")
+
+            if len(landmarks) < expected:
+                landmarks += [0.0] * (expected - len(landmarks))
+            else:
+                landmarks = landmarks[:expected]
 
         data = np.asarray(landmarks, dtype=np.float32).reshape(1, -1)
 

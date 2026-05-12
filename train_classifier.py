@@ -1,4 +1,5 @@
 import pickle
+import json
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
@@ -37,6 +38,45 @@ print(f'Overall Accuracy: {score * 100:.2f}%')
 # Detailed report to see which words the model struggles with
 print("\nClassification Report per Word:")
 print(classification_report(y_test, y_predict))
+
+report_dict = classification_report(y_test, y_predict, output_dict=True)
+per_class = []
+
+for label, values in report_dict.items():
+    if label in ("accuracy", "macro avg", "weighted avg"):
+        continue
+    per_class.append({
+        "label": label,
+        "precision": float(values.get("precision", 0.0)),
+        "recall": float(values.get("recall", 0.0)),
+        "f1_score": float(values.get("f1-score", 0.0)),
+        "support": int(values.get("support", 0)),
+    })
+
+per_class.sort(key=lambda item: item["f1_score"], reverse=True)
+
+metrics_payload = {
+    "accuracy": float(report_dict.get("accuracy", score)),
+    "macro_avg": {
+        "precision": float(report_dict.get("macro avg", {}).get("precision", 0.0)),
+        "recall": float(report_dict.get("macro avg", {}).get("recall", 0.0)),
+        "f1_score": float(report_dict.get("macro avg", {}).get("f1-score", 0.0)),
+    },
+    "weighted_avg": {
+        "precision": float(report_dict.get("weighted avg", {}).get("precision", 0.0)),
+        "recall": float(report_dict.get("weighted avg", {}).get("recall", 0.0)),
+        "f1_score": float(report_dict.get("weighted avg", {}).get("f1-score", 0.0)),
+    },
+    "sample_count": int(len(data)),
+    "test_sample_count": int(len(y_test)),
+    "feature_count": int(data.shape[1]),
+    "per_class": per_class,
+}
+
+with open('train_metrics.json', 'w', encoding='utf-8') as f:
+    json.dump(metrics_payload, f, ensure_ascii=True, indent=2)
+
+print("Metrics saved as train_metrics.json")
 
 # 6. Safely save the trained model
 # We save the whole dict so we can add metadata later if needed
