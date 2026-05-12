@@ -240,6 +240,24 @@ async def get_classification_metrics():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/classification/history")
+async def get_classification_history():
+    try:
+        history_path = BASE_DIR / "classification_history.json"
+
+        if not history_path.exists():
+            return {"history": [], "count": 0}
+
+        with open(history_path, "r", encoding="utf-8") as f:
+            history = json.load(f)
+
+        # Return last 10 entries, most recent first
+        recent = list(reversed(history))[:10]
+        return {"history": recent, "count": len(recent), "total": len(history)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/api/signs/{label}/images")
 async def get_sign_images(label: str, request: Request):
     try:

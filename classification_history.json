@@ -1,0 +1,12 @@
+[
+  {
+    "timestamp": "2026-05-12T12:09:04.799986+00:00",
+    "accuracy": 0.9865771812080537,
+    "macro_f1": 0.9631907038548022,
+    "weighted_f1": 0.9861195375988507,
+    "sample_count": 2235,
+    "test_sample_count": 447,
+    "feature_count": 84,
+    "class_count": 13
+  }
+]

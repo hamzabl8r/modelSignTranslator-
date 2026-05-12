@@ -1,5 +1,6 @@
 import pickle
 import json
+import os
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report
@@ -77,6 +78,33 @@ with open('train_metrics.json', 'w', encoding='utf-8') as f:
     json.dump(metrics_payload, f, ensure_ascii=True, indent=2)
 
 print("Metrics saved as train_metrics.json")
+
+# ── Append to classification history ─────────────────────────────────────
+from datetime import datetime, timezone
+
+history_path = 'classification_history.json'
+history_entry = {
+    "timestamp": datetime.now(timezone.utc).isoformat(),
+    "accuracy": metrics_payload["accuracy"],
+    "macro_f1": metrics_payload["macro_avg"]["f1_score"],
+    "weighted_f1": metrics_payload["weighted_avg"]["f1_score"],
+    "sample_count": metrics_payload["sample_count"],
+    "test_sample_count": metrics_payload["test_sample_count"],
+    "feature_count": metrics_payload["feature_count"],
+    "class_count": len(per_class),
+}
+
+history = []
+if os.path.exists(history_path):
+    with open(history_path, "r", encoding="utf-8") as f:
+        history = json.load(f)
+
+history.append(history_entry)
+
+with open(history_path, "w", encoding="utf-8") as f:
+    json.dump(history, f, ensure_ascii=True, indent=2)
+
+print(f"History entry appended ({len(history)} total)")
 
 # 6. Safely save the trained model
 # We save the whole dict so we can add metadata later if needed
