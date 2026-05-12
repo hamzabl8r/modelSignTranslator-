@@ -1,0 +1,109 @@
+{
+  "accuracy": 0.9865771812080537,
+  "macro_avg": {
+    "precision": 0.9883251207829069,
+    "recall": 0.951624623689401,
+    "f1_score": 0.9631907038548022
+  },
+  "weighted_avg": {
+    "precision": 0.98724410490657,
+    "recall": 0.9865771812080537,
+    "f1_score": 0.9861195375988507
+  },
+  "sample_count": 2235,
+  "test_sample_count": 447,
+  "feature_count": 84,
+  "per_class": [
+    {
+      "label": "BAD",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 37
+    },
+    {
+      "label": "CAR",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 39
+    },
+    {
+      "label": "HELLO",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 33
+    },
+    {
+      "label": "LOVE",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 40
+    },
+    {
+      "label": "NO",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 39
+    },
+    {
+      "label": "THANKS",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 30
+    },
+    {
+      "label": "THANK_YOU",
+      "precision": 0.975609756097561,
+      "recall": 1.0,
+      "f1_score": 0.9876543209876543,
+      "support": 40
+    },
+    {
+      "label": "FRIEND",
+      "precision": 0.9743589743589743,
+      "recall": 1.0,
+      "f1_score": 0.987012987012987,
+      "support": 38
+    },
+    {
+      "label": "GOOD",
+      "precision": 1.0,
+      "recall": 0.9736842105263158,
+      "f1_score": 0.9866666666666667,
+      "support": 38
+    },
+    {
+      "label": "YALLA",
+      "precision": 0.9714285714285714,
+      "recall": 1.0,
+      "f1_score": 0.9855072463768116,
+      "support": 34
+    },
+    {
+      "label": "HOW ARE YOU",
+      "precision": 0.926829268292683,
+      "recall": 1.0,
+      "f1_score": 0.9620253164556962,
+      "support": 38
+    },
+    {
+      "label": "YES",
+      "precision": 1.0,
+      "recall": 0.8974358974358975,
+      "f1_score": 0.9459459459459459,
+      "support": 39
+    },
+    {
+      "label": "NOTHING",
+      "precision": 1.0,
+      "recall": 0.5,
+      "f1_score": 0.6666666666666666,
+      "support": 2
+    }
+  ]
+}
