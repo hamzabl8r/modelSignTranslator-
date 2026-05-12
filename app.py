@@ -232,6 +232,7 @@ async def get_classification_metrics():
         with open(METRICS_PATH, "r", encoding="utf-8") as f:
             metrics = json.load(f)
 
+        metrics["source"] = "train_metrics.json"
         return metrics
     except HTTPException:
         raise
