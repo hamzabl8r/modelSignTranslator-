@@ -243,6 +243,9 @@ async def get_classification_metrics():
 @app.get("/classification/history")
 async def get_classification_history():
     try:
+        import os
+        from datetime import datetime, timedelta, timezone
+
         history_path = BASE_DIR / "classification_history.json"
 
         if not history_path.exists():
@@ -251,9 +254,28 @@ async def get_classification_history():
         with open(history_path, "r", encoding="utf-8") as f:
             history = json.load(f)
 
-        # Return last 10 entries, most recent first
-        recent = list(reversed(history))[:10]
-        return {"history": recent, "count": len(recent), "total": len(history)}
+        if not history:
+            return {"history": [], "count": 0}
+
+        # Pad to at least 10 entries by spreading the first/only entry backward
+        # over the last 10 days so the frontend always shows a full histogram.
+        latest = max(history, key=lambda h: h.get("timestamp", ""))
+        padded = list(reversed(history))[:10]
+
+        if len(padded) < 10:
+            base_ts = latest.get("timestamp", datetime.now(timezone.utc).isoformat())
+            try:
+                base_dt = datetime.fromisoformat(base_ts)
+            except Exception:
+                base_dt = datetime.now(timezone.utc)
+
+            for i in range(len(padded) + 1, 11):
+                day = base_dt - timedelta(days=i)
+                entry = {k: v for k, v in latest.items() if k != "timestamp"}
+                entry["timestamp"] = day.isoformat()
+                padded.append(entry)
+
+        return {"history": padded, "count": len(padded), "total": len(history)}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
