@@ -1,17 +1,17 @@
 {
-  "accuracy": 0.9865771812080537,
+  "accuracy": 0.9913793103448276,
   "macro_avg": {
-    "precision": 0.9883251207829069,
-    "recall": 0.951624623689401,
-    "f1_score": 0.9631907038548022
+    "precision": 0.9924114656257512,
+    "recall": 0.9901592215833702,
+    "f1_score": 0.9911589744218096
   },
   "weighted_avg": {
-    "precision": 0.98724410490657,
-    "recall": 0.9865771812080537,
-    "f1_score": 0.9861195375988507
+    "precision": 0.9914917789378996,
+    "recall": 0.9913793103448276,
+    "f1_score": 0.9913324371021787
   },
-  "sample_count": 2235,
-  "test_sample_count": 447,
+  "sample_count": 2320,
+  "test_sample_count": 464,
   "feature_count": 84,
   "per_class": [
     {
@@ -50,6 +50,13 @@
       "support": 39
     },
     {
+      "label": "NOTHING",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 2
+    },
+    {
       "label": "THANKS",
       "precision": 1.0,
       "recall": 1.0,
@@ -58,10 +65,17 @@
     },
     {
       "label": "THANK_YOU",
-      "precision": 0.975609756097561,
+      "precision": 1.0,
       "recall": 1.0,
-      "f1_score": 0.9876543209876543,
+      "f1_score": 1.0,
       "support": 40
+    },
+    {
+      "label": "YES",
+      "precision": 0.975,
+      "recall": 1.0,
+      "f1_score": 0.9873417721518988,
+      "support": 39
     },
     {
       "label": "FRIEND",
@@ -85,25 +99,18 @@
       "support": 34
     },
     {
+      "label": "HI",
+      "precision": 1.0,
+      "recall": 0.9411764705882353,
+      "f1_score": 0.9696969696969697,
+      "support": 17
+    },
+    {
       "label": "HOW ARE YOU",
-      "precision": 0.926829268292683,
-      "recall": 1.0,
-      "f1_score": 0.9620253164556962,
+      "precision": 0.972972972972973,
+      "recall": 0.9473684210526315,
+      "f1_score": 0.96,
       "support": 38
-    },
-    {
-      "label": "YES",
-      "precision": 1.0,
-      "recall": 0.8974358974358975,
-      "f1_score": 0.9459459459459459,
-      "support": 39
-    },
-    {
-      "label": "NOTHING",
-      "precision": 1.0,
-      "recall": 0.5,
-      "f1_score": 0.6666666666666666,
-      "support": 2
     }
   ]
 }

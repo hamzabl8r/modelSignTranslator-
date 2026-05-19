@@ -7,7 +7,7 @@ DATA_DIR = './data'
 os.makedirs(DATA_DIR, exist_ok=True)
 
 
-DEFAULT_CLASSES = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'YALLA', 'FRIEND', 'NOTHING', 'CAR',"HOW ARE YOU", "GOOD","BAD", "LOVE"]
+DEFAULT_CLASSES = ['HELLO', 'THANK_YOU', 'YES', 'NO', 'YALLA', 'FRIEND', 'NOTHING', 'CAR',"HOW ARE YOU", "GOOD","BAD", "LOVE","HI"]
 
 images_per_class = 200
 
