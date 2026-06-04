@@ -3,14 +3,23 @@ import pickle
 import cv2
 import mediapipe as mp
 import numpy as np
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, classification_report
 
 with open('./model.p', 'rb') as f:
     model_dict = pickle.load(f)
 model = model_dict['model']
 
-mp_hands = mp.solutions.hands
-hands = mp_hands.Hands(static_image_mode=True, min_detection_confidence=0.5, max_num_hands=2)
+# Updated for MediaPipe 0.10.35+
+# Use the 'tasks' module instead of 'solutions'
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
+
+# Initialize hand landmarker
+base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
+options = vision.HandLandmarkerOptions(base_options=base_options,
+                                       num_hands=2,
+                                       min_detection_confidence=0.5)
+detector = vision.HandLandmarker.create_from_options(options)
 
 DATA_DIR = './DataSet/test' 
 y_true = []
@@ -25,34 +34,44 @@ for dir_ in os.listdir(DATA_DIR):
         y_ = []
 
         img = cv2.imread(os.path.join(DATA_DIR, dir_, img_path))
+        if img is None:
+            print(f"Warning: Could not read image {img_path}")
+            continue
+            
         img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
-        results = hands.process(img_rgb)
-        if results.multi_hand_landmarks:
-            for hand_landmarks in results.multi_hand_landmarks:
-                for i in range(len(hand_landmarks.landmark)):
-                    x_.append(hand_landmarks.landmark[i].x)
-                    y_.append(hand_landmarks.landmark[i].y)
-
+        
+        # Convert to MediaPipe Image
+        mp_image = mp.Image(image_format=mp.ImageFormat.SRGB, data=img_rgb)
+        
+        # Detect hand landmarks
+        detection_result = detector.detect(mp_image)
+        
+        if detection_result.hand_landmarks:
+            for hand_landmarks in detection_result.hand_landmarks:
+                for landmark in hand_landmarks:
+                    x_.append(landmark.x)
+                    y_.append(landmark.y)
+            
             min_x, min_y = min(x_), min(y_)
-
+            
             for i in range(2):
-                if i < len(results.multi_hand_landmarks):
-                    for landmark in results.multi_hand_landmarks[i].landmark:
+                if i < len(detection_result.hand_landmarks):
+                    for landmark in detection_result.hand_landmarks[i]:
                         data_aux.append(landmark.x - min_x)
                         data_aux.append(landmark.y - min_y)
                 else:
-                    data_aux.extend([0.0] * 42) 
-
+                    data_aux.extend([0.0] * 42)
+            
             # Prediction
             if len(data_aux) == 84:
                 prediction = model.predict([np.asarray(data_aux)])
                 y_pred.append(str(prediction[0]))
                 y_true.append(dir_)
 
-accuracy = accuracy_score(y_true, y_pred)
-print(f'\nAccuracy on Test Set: {accuracy * 100:.2f}%')
-
-from sklearn.metrics import classification_report
-print("\nDetailed Report:")
-print(classification_report(y_true, y_pred))
+if y_true and y_pred:
+    accuracy = accuracy_score(y_true, y_pred)
+    print(f'\nAccuracy on Test Set: {accuracy * 100:.2f}%')
+    print("\nDetailed Report:")
+    print(classification_report(y_true, y_pred))
+else:
+    print("No valid predictions were made!")
