@@ -52,7 +52,7 @@ while cap.isOpened():
 
         if x_all:
             min_x, min_y = min(x_all), min(y_all)
-            for i in range(2):
+            for i in range(1):
                 if i < len(results.hand_landmarks):
                     for landmark in results.hand_landmarks[i]:
                         data_aux.append(landmark.x - min_x)
@@ -60,9 +60,9 @@ while cap.isOpened():
                         cx, cy = int(landmark.x * W), int(landmark.y * H)
                         cv2.circle(frame, (cx, cy), 3, (0, 255, 0), -1)
                 else:
-                    data_aux.extend([0.0] * 42)
+                    data_aux.extend([0.0] * 21)
 
-            if len(data_aux) == 84:
+            if len(data_aux) == 42:
                 prediction_proba = model.predict_proba([np.asarray(data_aux)])
                 confidence = np.max(prediction_proba)
                 

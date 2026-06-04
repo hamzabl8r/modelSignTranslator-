@@ -15,7 +15,7 @@ base_options = python.BaseOptions(model_asset_path='hand_landmarker.task')
 options = vision.HandLandmarkerOptions(
     base_options=base_options,
     running_mode=vision.RunningMode.IMAGE,
-    num_hands=2
+    num_hands=1
 )
 detector = vision.HandLandmarker.create_from_options(options)
 
@@ -39,15 +39,15 @@ for dir_ in os.listdir(DATA_DIR):
 
             min_x, min_y = min(x_all), min(y_all)
 
-            for i in range(2):
+            for i in range(1):
                 if i < len(results.hand_landmarks):
                     for landmark in results.hand_landmarks[i]:
                         data_aux.append(landmark.x - min_x)
                         data_aux.append(landmark.y - min_y)
                 else:
-                    data_aux.extend([0.0] * 42) # Padding for hand 2
+                    data_aux.extend([0.0] * 21) # Padding for one hand
 
-            if len(data_aux) == 84:
+            if len(data_aux) == 42 :
                 data.append(data_aux)
                 labels.append(dir_)
 
