@@ -36,8 +36,6 @@ else:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allow_origins,
-    # FIX: allow_credentials=True is incompatible with allow_origins=["*"].
-    # When origins is a wildcard, credentials must be False.
     allow_credentials=False if allow_origins == ["*"] else True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -135,9 +133,6 @@ def extract_model_and_labels(bundle):
         labels = bundle.get("labels") or bundle.get("classes") or bundle.get("labels_dict")
         label_encoder = bundle.get("label_encoder") or bundle.get("encoder")
     else:
-        # FIX: If bundle is a plain model object (not a dict), wrap it correctly.
-        # The original code assigned `bundle` to `model` but never set labels,
-        # so convert_prediction_to_label would always return the raw numeric index.
         model = bundle
 
     return model, labels, label_encoder
@@ -257,8 +252,7 @@ async def get_classification_history():
         if not history:
             return {"history": [], "count": 0}
 
-        # Pad to at least 10 entries by spreading the first/only entry backward
-        # over the last 10 days so the frontend always shows a full histogram.
+        
         latest = max(history, key=lambda h: h.get("timestamp", ""))
         padded = list(reversed(history))[:10]
 
@@ -428,8 +422,6 @@ async def predict(request: LandmarksRequest):
         prediction = model.predict(data)
         label = convert_prediction_to_label(prediction, labels, label_encoder)
 
-        # FIX: Treat raw numeric labels (e.g. "0", "1") as a sign of missing
-        # label mapping — return a clearer error so it's easy to diagnose.
         if label.isdigit():
             print(f"⚠️ Prediction returned a numeric index '{label}' — model.p may be missing a labels/classes key.")
 
@@ -469,6 +461,4 @@ if __name__ == "__main__":
     import uvicorn
 
     port = int(os.getenv("PORT", "8000"))
-    # FIX: Removed duplicate uvicorn.run() call — the original had it twice,
-    # which would cause a crash since the port is already bound after the first call.
     uvicorn.run(app, host="0.0.0.0", port=port)

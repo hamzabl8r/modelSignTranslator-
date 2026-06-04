@@ -27,14 +27,14 @@ def restore_default_classes():
             restored.append(class_name)
 
     if restored:
-        print(f"🔄 Dossiers recréés (mots par défaut restaurés) : {', '.join(restored)}")
+        print(f" Dossiers recréés (mots par défaut restaurés) : {', '.join(restored)}")
     else:
-        print("✅ Tous les mots par défaut sont déjà présents.")
+        print(" Tous les mots par défaut sont déjà présents.")
 
 
 restore_default_classes()
 
-# La liste active = DEFAULT_CLASSES (on collecte uniquement les mots par défaut)
+# La liste active = DEFAULT_CLASSES 
 classes = DEFAULT_CLASSES
 
 
@@ -45,7 +45,7 @@ cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
 cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
 
 if not cap.isOpened():
-    print("❌ Could not open webcam. Check your camera index.")
+    print(" Could not open webcam. Check your camera index.")
     sys.exit(1)
 
 try:
@@ -68,7 +68,7 @@ try:
         while True:
             ret, frame = cap.read()
             if not ret:
-                print("❌ Failed to read from camera.")
+                print(" Failed to read from camera.")
                 sys.exit(1)
 
             frame = cv2.flip(frame, 1)
@@ -86,7 +86,7 @@ try:
         while counter < images_per_class:
             ret, frame = cap.read()
             if not ret:
-                print("❌ Frame read failed during recording.")
+                print(" Failed to read frame during recording.")
                 break
 
             frame = cv2.flip(frame, 1)
@@ -107,7 +107,7 @@ try:
 
             counter += 1
 
-    print("\n✅ All classes processed!")
+    print("\n All classes processed!")
 
 finally:
     cap.release()

@@ -20,7 +20,7 @@ def get_sign_images(label):
     files.sort()
 
     # Retourne les URLs publiques des images
-    base_url = request.host_url.rstrip('/')  # ex: https://zen-footing-depravity.ngrok-free.dev
+    base_url = request.host_url.rstrip('/')  
     images = [f'{base_url}/api/signs/{label_upper}/images/{f}' for f in files]
 
     return jsonify({ 'images': images }), 200
