@@ -1,17 +1,17 @@
 {
-  "accuracy": 0.9913793103448276,
+  "accuracy": 0.9885057471264368,
   "macro_avg": {
-    "precision": 0.9924114656257512,
-    "recall": 0.9901592215833702,
-    "f1_score": 0.9911589744218096
+    "precision": 0.9897148358701633,
+    "recall": 0.9890320206109681,
+    "f1_score": 0.9891764934396424
   },
   "weighted_avg": {
-    "precision": 0.9914917789378996,
-    "recall": 0.9913793103448276,
-    "f1_score": 0.9913324371021787
+    "precision": 0.9888466698706396,
+    "recall": 0.9885057471264368,
+    "f1_score": 0.9884696492332231
   },
-  "sample_count": 2320,
-  "test_sample_count": 464,
+  "sample_count": 2609,
+  "test_sample_count": 522,
   "feature_count": 84,
   "per_class": [
     {
@@ -19,7 +19,7 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
-      "support": 37
+      "support": 36
     },
     {
       "label": "CAR",
@@ -27,13 +27,6 @@
       "recall": 1.0,
       "f1_score": 1.0,
       "support": 39
-    },
-    {
-      "label": "HELLO",
-      "precision": 1.0,
-      "recall": 1.0,
-      "f1_score": 1.0,
-      "support": 33
     },
     {
       "label": "LOVE",
@@ -64,25 +57,25 @@
       "support": 30
     },
     {
-      "label": "THANK_YOU",
+      "label": "WATER",
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
+      "support": 37
+    },
+    {
+      "label": "THANK_YOU",
+      "precision": 0.975609756097561,
+      "recall": 1.0,
+      "f1_score": 0.9876543209876543,
       "support": 40
     },
     {
-      "label": "YES",
+      "label": "FRIEND",
       "precision": 0.975,
       "recall": 1.0,
       "f1_score": 0.9873417721518988,
       "support": 39
-    },
-    {
-      "label": "FRIEND",
-      "precision": 0.9743589743589743,
-      "recall": 1.0,
-      "f1_score": 0.987012987012987,
-      "support": 38
     },
     {
       "label": "GOOD",
@@ -99,18 +92,32 @@
       "support": 34
     },
     {
-      "label": "HI",
-      "precision": 1.0,
-      "recall": 0.9411764705882353,
-      "f1_score": 0.9696969696969697,
-      "support": 17
+      "label": "HOW ARE YOU",
+      "precision": 0.95,
+      "recall": 1.0,
+      "f1_score": 0.9743589743589743,
+      "support": 38
     },
     {
-      "label": "HOW ARE YOU",
-      "precision": 0.972972972972973,
-      "recall": 0.9473684210526315,
-      "f1_score": 0.96,
+      "label": "HI",
+      "precision": 0.9736842105263158,
+      "recall": 0.9736842105263158,
+      "f1_score": 0.9736842105263158,
       "support": 38
+    },
+    {
+      "label": "YES",
+      "precision": 1.0,
+      "recall": 0.9487179487179487,
+      "f1_score": 0.9736842105263158,
+      "support": 39
+    },
+    {
+      "label": "HELLO",
+      "precision": 1.0,
+      "recall": 0.9393939393939394,
+      "f1_score": 0.96875,
+      "support": 33
     }
   ]
 }
