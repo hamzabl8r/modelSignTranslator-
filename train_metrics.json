@@ -1,17 +1,17 @@
 {
-  "accuracy": 0.9961089494163424,
+  "accuracy": 1.0,
   "macro_avg": {
-    "precision": 0.9961045364891519,
-    "recall": 0.9961045364891519,
-    "f1_score": 0.9961045364891519
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
   },
   "weighted_avg": {
-    "precision": 0.9961089494163424,
-    "recall": 0.9961089494163424,
-    "f1_score": 0.9961089494163424
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0
   },
-  "sample_count": 2567,
-  "test_sample_count": 514,
+  "sample_count": 2427,
+  "test_sample_count": 486,
   "feature_count": 42,
   "per_class": [
     {
@@ -19,21 +19,21 @@
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
-      "support": 40
+      "support": 31
     },
     {
       "label": "CAR",
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
-      "support": 39
+      "support": 27
     },
     {
       "label": "FRIEND",
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
-      "support": 38
+      "support": 31
     },
     {
       "label": "GOOD",
@@ -57,6 +57,13 @@
       "support": 40
     },
     {
+      "label": "HOW ARE YOU",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 40
+    },
+    {
       "label": "LOVE",
       "precision": 1.0,
       "recall": 1.0,
@@ -71,11 +78,18 @@
       "support": 40
     },
     {
-      "label": "THANK YOU",
+      "label": "NOTHING",
       "precision": 1.0,
       "recall": 1.0,
       "f1_score": 1.0,
       "support": 40
+    },
+    {
+      "label": "THANK YOU",
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1_score": 1.0,
+      "support": 39
     },
     {
       "label": "WATER",
@@ -90,20 +104,6 @@
       "recall": 1.0,
       "f1_score": 1.0,
       "support": 38
-    },
-    {
-      "label": "HOW ARE YOU",
-      "precision": 0.975,
-      "recall": 0.975,
-      "f1_score": 0.975,
-      "support": 40
-    },
-    {
-      "label": "NOTHING",
-      "precision": 0.9743589743589743,
-      "recall": 0.9743589743589743,
-      "f1_score": 0.9743589743589743,
-      "support": 39
     }
   ]
 }
