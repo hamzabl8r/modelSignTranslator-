@@ -1,5 +1,14 @@
+# Large data files
+data/
+data.pickle
+model.p
+ngrok.exe
+
+# Python
+venv/
 __pycache__/
 *.pyc
-model.p
-*.pickle
-ngrok.exe
+
+# Logs
+classification_history.json
+train_metrics.json
