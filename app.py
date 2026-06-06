@@ -88,7 +88,7 @@ class LandmarksRequest(BaseModel):
 # ==================== HELPERS ====================
 
 def clean_label_name(label: str) -> str:
-    return label.strip().upper().replace(" ", "_")
+    return label.strip().upper()
 
 
 def get_sign_labels() -> List[str]:
