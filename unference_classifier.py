@@ -28,7 +28,7 @@ current_prediction = ""
 last_added_word = ""
 frame_counter = 0
 STABILITY_THRESHOLD = 20 
-CONFIDENCE_THRESHOLD = 0.80 
+CONFIDENCE_THRESHOLD = 0.65 
 
 while cap.isOpened():
     ret, frame = cap.read()
